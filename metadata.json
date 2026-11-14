@@ -1,0 +1,6 @@
+{
+  "name": "ClinicFlow AI | كلينيك فلو",
+  "description": "إدارة أذكى للعيادات.. وتجربة أسهل للمرضى — منصة ذكية ثنائية اللغة لإدارة مواعيد العيادات الطبية والذكاء الاصطناعي.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,942 @@
+# MASTER BUILD PROMPT — CLINICFLOW AI
+
+## 1. Project Identity and Mission
+
+Build a complete, modern, professional, full-stack AI-powered medical clinic appointment management web application called:
+
+**ClinicFlow AI | كلينيك فلو**
+
+Arabic tagline:
+
+**إدارة أذكى للعيادات.. وتجربة أسهل للمرضى**
+
+This is a functional university graduation project for an AI Ambassadors program. It must demonstrate real-world problem solving, professional user experience, database integration, intelligent automation, and actual Google Gemini AI capabilities.
+
+The goal is to create a working application that could eventually be adapted for a real multi-specialty medical center in Egypt.
+
+**This must NOT be a static website, landing-page-only prototype, collection of disconnected mockups, or non-functional demonstration.**
+
+Build a working full-stack application with functional business logic, persistent data, role-based access, booking workflows, analytics, and an actual AI assistant.
+
+The system must be visually impressive enough for a graduation committee demonstration, while remaining realistic, accessible, and easy to use.
+
+## 2. Technology and Architecture
+
+Create a responsive **full-stack web application**, not a native mobile application.
+
+Preferred architecture:
+
+- React with TypeScript for the frontend.
+- Node.js server-side application and secure API endpoints.
+- Tailwind CSS for responsive styling.
+- High-quality reusable UI components.
+- Firebase Authentication for identity management.
+- Cloud Firestore for persistent data.
+- Gemini API using Google's maintained official SDK for AI functionality.
+- Recharts or a compatible charting library for interactive dashboards.
+- Lucide icons.
+- React Hook Form and Zod, or equivalent form validation.
+- Modular code with clear separation between frontend, backend, database operations, booking logic, and AI services.
+
+Use the native Google AI Studio Firebase integration and configure it when prompted.
+
+Keep AI API keys and administrative credentials in server-side environment variables only. Never expose secrets in the browser.
+
+If an integration requires a manual setup action, clearly explain the required action in the development output.
+
+Use real database persistence for production functionality. Browser local storage must never be the primary source of truth for appointments.
+
+## 3. Language and Visual Design
+
+### Language
+
+All customer-facing content must be in **Arabic** by default.
+
+- Full right-to-left RTL layout.
+- Excellent Arabic typography.
+- Use Cairo or Tajawal with correct font weights.
+- Ensure Arabic words and numbers are rendered correctly.
+- Correct alignment of icons, calendars, tables, and forms.
+- Support Egyptian patient names and telephone formats.
+- Use clear Modern Standard Arabic with simple, friendly wording.
+- The AI assistant should understand Egyptian Arabic naturally.
+
+The app may internally use English code identifiers.
+
+### Visual Design Direction
+
+Create a premium healthcare SaaS visual identity.
+
+Style: **Modern Medical Technology + Enterprise Dashboard + Calm Human-Centered UX**
+
+Suggested palette:
+
+- Deep Navy: #14283F
+- Medical Teal: #087F8C
+- Soft Turquoise: #E6F5F5
+- White: #FFFFFF
+- Light Background: #F6F9FC
+- Success Green: #21A675
+- Warning Amber: #E9A23B
+- Error Red: #DC5960
+
+Use a professional, consistent design system with:
+
+- Clean navigation.
+- Generous spacing.
+- Modern cards with subtle shadows.
+- Soft rounded corners.
+- Clear data visualizations.
+- Elegant dashboard widgets.
+- Smooth, restrained micro-interactions.
+- Loading skeletons.
+- Success and error messages.
+- Professional empty states.
+- Mobile-friendly controls.
+- Accessibility-aware color contrast.
+
+Avoid excessively decorative elements, exaggerated gradients, generic AI artwork, or overcrowded screens.
+
+The final design should look like a real healthcare technology product rather than a basic student assignment.
+
+## 4. User Roles and Permissions
+
+Implement the following roles with proper role-based access control.
+
+### A. Guest
+
+A visitor who has not signed in.
+
+Can:
+
+- View the public homepage.
+- Browse medical specialties.
+- View doctors and available appointment times.
+- Read the platform information.
+- Start the booking flow.
+- Sign in to complete a booking.
+
+Cannot view private appointments or administrative data.
+
+### B. Patient
+
+Can:
+
+- Sign in securely.
+- Manage a simple personal profile.
+- Browse specialties and doctors.
+- Search for appointments.
+- Book available appointment slots.
+- See booking confirmations.
+- View current and past bookings.
+- Cancel appointments according to policy.
+- Join a waitlist when a schedule is full.
+- Receive in-app notifications.
+- Ask the AI assistant for help navigating appointments.
+
+### C. Receptionist
+
+Can:
+
+- Access a dedicated reception dashboard.
+- Search for appointments using permitted fields.
+- Register appointments for patients who cannot use the online interface.
+- Check patients in upon arrival.
+- View appointment status and queue information.
+- Cancel or reschedule appointments under authorized rules.
+- Handle walk-in appointments without exceeding capacity.
+- Manage waiting patients.
+- Record attendance and no-show statuses.
+- View relevant doctors' daily schedules.
+
+### D. Administrator
+
+Can:
+
+- Access the full management dashboard.
+- Manage specialties and doctor profiles.
+- Define doctor availability and appointment capacity.
+- Set holidays, breaks, and schedule exceptions.
+- Configure booking and cancellation policies.
+- Manage receptionist accounts and role assignments.
+- View reports and analytics.
+- Review audit logs.
+- Use AI to analyze operational performance.
+- Export operational reports.
+
+### Security Requirements
+
+Patients can only access their own private appointment information.
+
+Receptionists can only access the data necessary for reception operations.
+
+Administrator access must not be acquired by choosing a role in the UI.
+
+Implement secure server-side authorization, Firebase Security Rules, and an administrator provisioning mechanism controlled by a server-side allowlist or equivalent secure configuration.
+
+Do not rely on frontend route protection alone.
+
+## 5. Application Pages
+
+Create the following functional pages and connect them through working navigation.
+
+### Page 1 — Public Homepage
+
+Build a complete professional landing page.
+
+Main headline:
+
+**صحتك تستحق وقتك.. احجز موعدك بكل سهولة**
+
+Supporting text:
+
+**منصة ذكية لتنظيم مواعيد العيادات الطبية، وتقليل الانتظار، وتسهيل الوصول إلى الرعاية الصحية.**
+
+Primary CTA:
+
+**احجز موعدك الآن**
+
+Secondary CTA:
+
+**استكشف التخصصات**
+
+Include:
+
+1. Professional header with ClinicFlow AI logo.
+2. Hero section with premium medical visual design.
+3. Quick appointment search.
+4. Specialty cards.
+5. Three-step booking explanation.
+6. Features and benefits.
+7. Section introducing the AI assistant.
+8. Patient-friendly accessibility features.
+9. Professional footer.
+
+The homepage must look complete and visually polished, not like an admin dashboard.
+
+### Page 2 — Medical Specialties
+
+Display specialties as interactive cards.
+
+Each card should show:
+
+- Specialty name.
+- Medical icon.
+- Short description.
+- Number of available doctors.
+- Next available appointment, when applicable.
+- Booking action.
+
+Include specialties such as:
+
+- الباطنة
+- الأطفال
+- العظام
+- الجلدية
+- القلب
+- الأنف والأذن والحنجرة
+- النساء والتوليد
+- الأسنان
+
+Each specialty should lead to an appropriate list of doctors.
+
+### Page 3 — Doctors Directory
+
+Create a functional doctor directory including:
+
+- Doctor name.
+- Specialty.
+- Professional placeholder portrait or avatar.
+- Availability status based on the schedule.
+- Working days.
+- Next available appointment.
+- View profile action.
+- Book appointment action.
+
+Do not fabricate verified medical credentials or real doctors' identities. All seeded doctors must be clearly fictional demo profiles.
+
+### Page 4 — Smart Appointment Booking
+
+Create a step-by-step booking wizard.
+
+**Step 1:** Choose specialty.
+
+**Step 2:** Choose doctor.
+
+**Step 3:** Choose date.
+
+**Step 4:** Choose an actually available time slot.
+
+**Step 5:** Review patient information and appointment details.
+
+**Step 6:** Confirm booking.
+
+After confirmation, generate:
+
+- Unique booking reference.
+- Doctor name.
+- Specialty.
+- Date and time.
+- Appointment status.
+- Check-in instructions.
+- Printable or downloadable booking confirmation.
+
+Only display time slots that are genuinely available according to the database and scheduling rules.
+
+Prevent double booking and inconsistent booking counts.
+
+### Page 5 — Patient Dashboard
+
+Include:
+
+- Personalized greeting.
+- Upcoming appointments.
+- Appointment history.
+- Booking status indicators.
+- Cancel appointment action.
+- Join waitlist action where eligible.
+- Notifications.
+- Profile settings.
+- Entry point to the AI assistant.
+
+### Page 6 — Reception Dashboard
+
+Build an operational dashboard for medical reception staff.
+
+Include:
+
+- Today's scheduled appointments.
+- Confirmed arrivals.
+- Patients waiting.
+- Patients who have completed appointments.
+- No-show count.
+- Search and filtering.
+- Patient check-in.
+- Walk-in registration.
+- Booking and cancellation tools.
+- Doctor-specific daily schedules.
+- Visible remaining capacity.
+
+Actions must update the database and related dashboard statistics.
+
+### Page 7 — Administrator Dashboard
+
+Create a premium interactive analytics dashboard.
+
+Display KPI cards for:
+
+- Total appointments.
+- Today's appointments.
+- Total available capacity.
+- Capacity utilization percentage.
+- Completed appointments.
+- Cancellations.
+- No-show rate.
+- Waitlist count.
+- Active doctors.
+
+Add interactive data visualizations:
+
+- Daily and weekly booking trends.
+- Most requested specialties.
+- Doctor utilization.
+- Peak appointment hours.
+- Cancellation rates.
+- No-show trends.
+- Capacity utilization by specialty.
+
+Include filters for date ranges, specialties, doctors, and booking status.
+
+All statistics must derive from real stored application data or clearly identified seeded demonstration data.
+
+### Page 8 — Doctor and Schedule Management
+
+Allow administrators to:
+
+- Add and edit doctor profiles.
+- Assign specialties.
+- Configure working days.
+- Define start and end times.
+- Add scheduled breaks.
+- Configure appointment duration.
+- Set daily appointment limits.
+- Define special closure dates.
+- Temporarily disable appointments.
+- View existing reservations before modifying a schedule.
+
+Prevent changes that would silently invalidate confirmed appointments.
+
+### Page 9 — Smart Waitlist
+
+When a doctor or schedule is fully booked, show:
+
+**عذرًا، اكتمل عدد الحجوزات لهذا الموعد. يمكنك الانضمام إلى قائمة الانتظار.**
+
+Patients can join a waitlist for a specific doctor and date.
+
+The system should:
+
+- Maintain an ordered waiting list.
+- Avoid duplicate active waitlist entries.
+- Detect when capacity becomes available.
+- Offer the available appointment to the next eligible patient.
+- Require patient confirmation before finalizing the appointment.
+- Give the offer a configurable expiration period.
+- Release expired offers safely.
+- Show accurate waitlist and offer statuses.
+- Create in-app notifications.
+
+Do not claim that SMS or WhatsApp notifications were sent unless those integrations are actually configured.
+
+### Page 10 — AI Assistant
+
+Create a highly visible, polished AI assistant called:
+
+**مساعد كلينيك فلو الذكي**
+
+Use real Gemini API integration through a secure backend.
+
+The assistant must understand natural Arabic queries such as:
+
+- "عاوز أحجز كشف باطنة بكرة."
+- "في دكتور أطفال متاح يوم الخميس؟"
+- "إيه أقرب ميعاد متاح؟"
+- "إزاي ألغي الحجز؟"
+- "هل فيه موعد بعد الساعة 5؟"
+- "إيه التخصصات المتاحة؟"
+
+The assistant must use authorized server-side functions to retrieve actual appointment information.
+
+It must not invent doctors, dates, capacities, appointment IDs, or availability.
+
+It can suggest appointments but must request explicit confirmation before creating or canceling bookings.
+
+All booking mutations must go through the same validated booking service used by the normal booking UI.
+
+### Important Medical Safety Rule
+
+The AI assistant is an administrative appointment assistant, not a medical diagnostic system.
+
+It must not diagnose medical conditions, prescribe medications, or provide personalized treatment decisions.
+
+If a user describes an emergency or potentially dangerous symptoms, advise them to seek immediate professional or emergency medical care.
+
+The assistant may explain specialties generally, but must avoid confidently determining which specialist a patient medically needs based solely on symptoms.
+
+### Page 11 — AI Business Intelligence
+
+Create an administration-only panel:
+
+**التحليل الذكي لأداء العيادات**
+
+Provide buttons such as:
+
+- حلّل أداء الأسبوع الحالي
+- ما أكثر العيادات ازدحامًا؟
+- كيف نخفّض معدلات عدم الحضور؟
+- ما الأوقات التي تحتاج زيادة في السعة؟
+- اقترح تحسينًا لجدول الأطباء
+
+The backend should collect aggregated, authorized operational metrics and pass them to Gemini.
+
+Generate:
+
+1. Executive summary.
+2. Important findings.
+3. Potential operational bottlenecks.
+4. Data-supported recommendations.
+5. Evidence for recommendations.
+6. Relevant reporting period.
+
+Do not send patient-identifiable medical or personal data to the model.
+
+Clearly separate actual measurements from AI-generated suggestions.
+
+Do not change schedules or capacities automatically based on AI recommendations.
+
+### Page 12 — Settings and Audit Log
+
+Create functional administrative settings for:
+
+- Clinic name and visual identity.
+- Clinic timezone.
+- General booking policies.
+- Cancellation cutoff.
+- Daily booking limits.
+- Waitlist offer expiration.
+- Administrative role management.
+- Audit history of important actions.
+
+Show who performed critical booking or administrative changes and when.
+
+## 6. Critical Appointment Business Logic
+
+This section is essential.
+
+The booking engine must work reliably.
+
+### Availability
+
+Appointment availability must be calculated using:
+
+- Doctor schedule.
+- Working days.
+- Schedule exceptions.
+- Appointment duration.
+- Breaks.
+- Existing bookings.
+- Configured daily capacity.
+- Per-slot capacity.
+- Current date and time.
+- Temporary appointment holds, where applicable.
+
+Use **Africa/Cairo** as the default timezone, but make it configurable.
+
+Store timestamps consistently and handle conversion between local time and UTC correctly.
+
+Past appointment times must never be bookable.
+
+### Capacity Management
+
+Each doctor should have a configurable daily limit.
+
+Example:
+
+Doctor A has a maximum of 20 appointments per day.
+
+If 19 valid appointments exist, only one additional appointment can be confirmed.
+
+When the 20th appointment is booked, the schedule must stop accepting additional bookings.
+
+If a 21st patient attempts to book, the system must reject the request and offer the waitlist.
+
+For normal one-patient time slots, prevent two patients from booking the same doctor and time.
+
+### Concurrency Protection
+
+Implement atomic booking operations using Firestore transactions or an equivalently safe server-controlled mechanism.
+
+Verify capacity and reserve the appointment atomically.
+
+Protect both daily capacity and individual time slots.
+
+If two users try to reserve the final available appointment simultaneously, only one booking may succeed.
+
+Do not rely on frontend counters or disabled buttons to enforce availability.
+
+### Booking Statuses
+
+Support:
+
+- Confirmed
+- Checked In
+- Completed
+- Cancelled
+- No Show
+
+Define status transitions explicitly.
+
+Completed and no-show appointments still count as historical booked capacity for their time period.
+
+Cancelled appointments may release capacity under valid rules.
+
+Prevent duplicate active bookings for the same patient, doctor, and time slot.
+
+### Cancellation
+
+Allow cancellations according to configurable rules.
+
+Default example: patient self-cancellation is permitted until 4 hours before the appointment.
+
+Administrators or authorized receptionists may handle special cases.
+
+Never delete booking history when canceling. Preserve the cancellation status and audit event.
+
+### No-Show Handling
+
+Receptionists can mark patients as absent once an appointment's appropriate check-in period has passed.
+
+Record no-show statistics.
+
+Do not automatically block patients from future appointments based solely on no-show history.
+
+### No External Payment Dependency
+
+The initial application should not require online payment.
+
+Do not implement fake payment processing.
+
+The system must be fully functional without a payment gateway.
+
+### Notifications
+
+Implement real in-app notifications.
+
+For SMS, email, and WhatsApp, show integration readiness or demo simulation only unless a real provider is connected.
+
+Clearly label simulated notifications.
+
+## 7. Database Requirements
+
+Create a proper Firestore database structure.
+
+Suggested collections:
+
+- users
+- patientProfiles
+- specialties
+- doctors
+- doctorSchedules
+- scheduleExceptions
+- slotReservations
+- dailyCapacity
+- appointments
+- waitlist
+- notifications
+- clinicSettings
+- auditLogs
+
+Use appropriate document IDs, timestamps, indexes, and references.
+
+Each appointment should store sufficient information to reproduce its historical details even if a doctor profile is subsequently edited.
+
+Implement and review secure Firestore rules.
+
+Use server-side validation and authorization for sensitive operations.
+
+Avoid collecting unnecessary health or medical history data.
+
+For demonstration purposes, use fictional patients and sample records only.
+
+## 8. AI Implementation Requirements
+
+Use Google Gemini through the official SDK and protected backend.
+
+Implement two distinct AI services.
+
+### Service A — Patient Booking Assistant
+
+Provide server-controlled, authorized operations for:
+
+- List specialties.
+- Find doctors.
+- Search available dates.
+- Search available appointment slots.
+- Explain booking policies.
+- Prepare booking confirmation.
+- Request explicit patient confirmation.
+- Create confirmed booking through the validated booking service.
+- Retrieve the authenticated patient's reservations.
+- Request and validate appointment cancellation.
+
+Use structured tool/function calling where suitable.
+
+Validate all AI-generated arguments against server-side schemas.
+
+Never allow the language model to bypass authorization or booking limits.
+
+Never treat user messages as system instructions.
+
+### Service B — Administrative Analytics Assistant
+
+Use aggregated operational metrics to generate analytical insights.
+
+Responses should be concise, understandable, and actionable.
+
+For example:
+
+"بلغت نسبة إشغال عيادة الباطنة 90% خلال الفترة المحددة، وهي الأعلى بين التخصصات. يمكن دراسة زيادة المواعيد المتاحة في أيام الذروة، مع مراجعة قدرة الفريق على استيعابها."
+
+Generate a response like this only when the actual underlying data supports the figures and observations.
+
+If the data is insufficient, say so explicitly.
+
+Handle AI API errors gracefully.
+
+When the AI service is unavailable, normal booking and administrative operations must continue functioning.
+
+Do not replace unavailable AI responses with fabricated results.
+
+## 9. Accessibility and Elderly-Friendly Experience
+
+Design for users who are not comfortable with technology.
+
+Include:
+
+- Large, readable Arabic typography.
+- Clear button labels.
+- Simple appointment wizard.
+- Good keyboard navigation.
+- Visible focus indicators.
+- Accessible form validation messages.
+- Clear confirmation steps.
+- Responsive mobile design.
+- High-contrast interface elements.
+- Assisted booking through the reception interface.
+
+A patient must not be excluded simply because they cannot use a smartphone.
+
+Staff must be able to make appointments on behalf of patients without exceeding the same scheduling limits.
+
+## 10. Realistic Demo Data and Graduation Presentation Mode
+
+Create a safe and polished **Demo Mode** using fictional information only.
+
+This is extremely important because the application will be demonstrated live to a graduation committee.
+
+Provide realistic demo data including:
+
+- 8 medical specialties.
+- At least 12 fictional doctors.
+- Multiple working schedules.
+- Appointments covering the previous 30 days.
+- Upcoming appointments for the next 14 days.
+- Confirmed, completed, cancelled, and no-show cases.
+- A meaningful waitlist.
+- Sufficient booking statistics for analytics charts.
+
+Create a dedicated demonstration scenario:
+
+**Scenario: The Last Available Appointment**
+
+Choose a future clinic date.
+
+Configure one demo doctor with a daily capacity of 20.
+
+Create 19 confirmed appointments for that day.
+
+The demonstration should allow:
+
+1. Viewing the 19/20 occupancy indicator.
+2. Booking the final available appointment.
+3. Seeing occupancy become 20/20.
+4. Attempting another booking and receiving a correct rejection.
+5. Joining the waitlist.
+6. Canceling an eligible appointment.
+7. Offering the newly available appointment to the next waiting patient.
+8. Confirming the waitlist offer.
+9. Seeing dashboard statistics update.
+10. Asking the AI assistant to explain the booking situation using real database values.
+
+This scenario must be executable, not simply shown as a static animation.
+
+### Demo Security
+
+If a role-switching demonstration mode is included, it must run in an isolated fictional demo environment.
+
+It must never grant real administrator permissions or expose production data.
+
+Provide a clear **Demo Mode** label.
+
+Include a safe reset-demo-data function available only to authorized demonstrators.
+
+Do not seed demonstration records into a live medical center's real patient dataset.
+
+## 11. Design Details That Make the Application Stand Out
+
+Build professional UI elements including:
+
+- Elegant, readable statistical cards.
+- Real-time-looking updates driven by actual state changes.
+- Interactive charts.
+- Specialty-specific icons.
+- Appointment status chips.
+- Doctor schedule calendar.
+- Capacity progress bars.
+- Professional toast notifications.
+- Loading and empty states.
+- Skeleton loaders.
+- Searchable and filterable tables.
+- Confirmation dialogs for destructive actions.
+- Well-designed AI chat interface.
+- Print-friendly confirmation layout.
+- Desktop dashboard sidebar.
+- Collapsible mobile navigation.
+
+Include a professional ClinicFlow AI logo made with simple typographic and vector UI elements.
+
+Avoid broken image assets and excessive reliance on third-party stock images.
+
+## 12. Performance and Reliability
+
+Implement:
+
+- Input validation.
+- Server-side authorization.
+- Safe error handling.
+- Booking transaction integrity.
+- Loading indicators.
+- Responsive layouts.
+- Empty-state handling.
+- Proper database error messages.
+- Logical code organization.
+- Reusable components.
+- No exposed API secrets.
+- No fake success messages.
+- No buttons without a working action unless clearly marked as unavailable.
+
+Use suitable Firestore pagination and efficient queries for administrative data.
+
+Avoid fetching all patients or appointments unnecessarily.
+
+The app should remain usable when Gemini is temporarily unavailable.
+
+## 13. Quality Assurance and Required Tests
+
+Before presenting the project as complete, verify the following.
+
+### Booking Tests
+
+1. A patient can book an available appointment.
+2. The booking persists after refreshing the page.
+3. The same appointment cannot be booked twice.
+4. Two simultaneous requests cannot reserve the final available slot.
+5. Daily capacity cannot be exceeded.
+6. Past appointments cannot be booked.
+7. An eligible appointment can be cancelled.
+8. Cancelling updates availability correctly.
+9. The waitlist functions correctly.
+10. Expired waitlist offers cannot be accepted.
+11. Reception staff can check patients in.
+12. Appointment status transitions remain valid.
+
+### Security Tests
+
+13. Patients cannot view other patients' bookings.
+14. Receptionists cannot access unrestricted administrative functions.
+15. Users cannot assign themselves administrator privileges.
+16. Server endpoints reject unauthorized access.
+17. Database rules enforce appropriate access.
+18. Gemini API keys are never exposed in client-side code.
+
+### AI Tests
+
+19. The AI responds to Arabic booking questions.
+20. The AI searches real appointment availability.
+21. The AI never invents appointment confirmations.
+22. Booking through AI requires explicit confirmation.
+23. AI-generated analytics match the underlying metrics.
+24. Booking continues to work if Gemini is unavailable.
+
+### Interface Tests
+
+25. Arabic RTL is consistent across all pages.
+26. Mobile layouts work correctly.
+27. Forms display clear error messages.
+28. Buttons and links perform their intended actions.
+29. Dashboard statistics update following database changes.
+30. There are no critical build, runtime, or browser-console errors.
+
+Where automated tests can be implemented, create and run them.
+
+Do not report unexecuted tests as passed.
+
+## 14. Development Priorities
+
+Implement the project incrementally and preserve working functionality.
+
+**Phase 1 — Foundation**
+
+- Full application architecture.
+- Design system.
+- RTL layout.
+- Homepage.
+- Navigation.
+- Firebase setup.
+- Authentication.
+- Role system.
+
+**Phase 2 — Core Clinic System**
+
+- Specialties.
+- Doctors.
+- Schedules.
+- Booking.
+- Capacity protection.
+- Patient dashboard.
+- Reception dashboard.
+- Waitlist.
+
+**Phase 3 — Administration**
+
+- Analytics dashboard.
+- Doctor management.
+- Capacity settings.
+- Audit history.
+- Reports.
+
+**Phase 4 — Genuine AI Integration**
+
+- Gemini booking assistant.
+- Tool-based appointment lookup.
+- AI administrative analytics.
+- AI security and confirmation requirements.
+
+**Phase 5 — Graduation Demo**
+
+- Fictional sample dataset.
+- Last-available-appointment scenario.
+- Demo reset.
+- UX improvements.
+- Responsive testing.
+- Error correction.
+
+Prioritize a reliable, functional core booking engine over decorative or secondary features.
+
+If an advanced feature cannot be completed reliably, do not create a fake substitute. Clearly identify what is complete and what remains.
+
+## 15. Final Delivery Requirements
+
+The final result must include:
+
+1. A working full-stack application.
+2. A professional Arabic homepage.
+3. Functional patient booking workflow.
+4. Secure authentication and roles.
+5. Persistent Firestore database.
+6. Reception dashboard.
+7. Administrator dashboard.
+8. Configurable doctors and schedules.
+9. Booking capacity enforcement.
+10. Functional waitlist.
+11. Genuine Gemini AI integration.
+12. AI-driven operational analysis.
+13. Fictional demonstration dataset.
+14. A graduation demonstration workflow.
+15. Responsive mobile and desktop interfaces.
+
+Also create a short **About This Project** section explaining in Arabic:
+
+- The real-world problem.
+- The proposed solution.
+- How AI is used.
+- The technologies used.
+- The benefits for patients and clinic administrators.
+
+Provide simple instructions for:
+
+- Enabling Firebase.
+- Configuring administrator access.
+- Managing secrets.
+- Running the demonstration.
+- Testing the major features.
+- Publishing the application.
+- Capturing screenshots for graduation submission.
+
+## 16. Final Instruction
+
+**Begin building the actual application now.**
+
+Do not respond with only an implementation plan, requirements document, or UI design proposal.
+
+Create the project files, implement the working functionality, connect the services, and render a usable application preview.
+
+Work iteratively, fix implementation errors, and prioritize core functionality.
+
+Make reasonable technical decisions without stopping for unnecessary clarification.
+
+If external authorization or configuration is required, tell me exactly which Google AI Studio action I need to perform.
+
+Never claim that a feature works unless it has been implemented, and never claim a test passed unless it was actually executed.
+
+**The ultimate goal is a polished, intelligent, functional Arabic healthcare scheduling application that demonstrates practical AI innovation and impresses a university graduation committee.**

@@ -1,0 +1,116 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer base {
+  :root {
+    --font-ar: 'Cairo', system-ui, -apple-system, sans-serif;
+    --font-en: 'Inter', system-ui, -apple-system, sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+    --bg-canvas: #F6F9FC;
+    --bg-surface: #FFFFFF;
+    --text-primary: #14283F;
+    --accent-teal: #087F8C;
+    --accent-soft: #E6F5F5;
+  }
+
+  .dark {
+    --bg-canvas: #09111E;
+    --bg-surface: #111D2E;
+    --text-primary: #F1F5F9;
+    --accent-teal: #14B8C4;
+    --accent-soft: #10323B;
+  }
+
+  html {
+    font-size: 16px;
+    scroll-behavior: smooth;
+    text-size-adjust: 100%;
+  }
+
+  html[lang^="ar"] body {
+    font-family: var(--font-ar);
+  }
+
+  html[lang^="en"] body {
+    font-family: var(--font-en);
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    overflow-x: clip;
+  }
+
+  /* WCAG 2.2 AA Focus Indicators */
+  :focus-visible {
+    outline: 3px solid #087F8C;
+    outline-offset: 2px;
+  }
+
+  .dark :focus-visible {
+    outline: 3px solid #2DD4BF;
+    outline-offset: 2px;
+  }
+
+  /* Respect user motion preferences */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+.font-mono-code {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.text-balance {
+  text-wrap: balance;
+}
+
+/* Skip to main content link */
+.skip-link {
+  position: fixed;
+  inset-block-start: -100px;
+  inset-inline-start: 16px;
+  z-index: 100;
+  padding: 12px 20px;
+  background-color: #14283F;
+  color: #FFFFFF;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: inset-block-start 150ms ease;
+}
+
+.skip-link:focus {
+  inset-block-start: 16px;
+}
+
+/* Print layout for booking confirmations */
+@media print {
+  header,
+  nav,
+  aside,
+  footer,
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: #FFFFFF !important;
+    color: #000000 !important;
+  }
+  .print-card {
+    border: 1px solid #CBD5E1 !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+    padding: 24px !important;
+  }
+}

@@ -1,0 +1,302 @@
+{
+  "entities": {
+    "UserAccount": {
+      "title": "UserAccount",
+      "description": "Authenticated platform account preferences without privilege escalation.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "displayName": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "preferredLanguage": { "type": "string", "enum": ["ar-EG", "en"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "displayName", "preferredLanguage", "createdAt", "updatedAt"]
+    },
+    "PatientProfile": {
+      "title": "PatientProfile",
+      "description": "Private patient contact and booking profile isolated per owner.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "fullName": { "type": "string", "minLength": 2, "maxLength": 120 },
+        "phone": { "type": "string", "minLength": 8, "maxLength": 20, "pattern": "^\\+?[0-9\\-\\s]{8,20}$" },
+        "email": { "type": "string", "format": "email", "maxLength": 160 },
+        "preferredLanguage": { "type": "string", "enum": ["ar-EG", "en"] },
+        "elderlyAssistMode": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "fullName", "phone", "preferredLanguage", "createdAt", "updatedAt"]
+    },
+    "Specialty": {
+      "title": "Specialty",
+      "description": "Medical clinic specialty metadata in Arabic and English.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 64, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "nameAr": { "type": "string", "minLength": 2, "maxLength": 100 },
+        "nameEn": { "type": "string", "minLength": 2, "maxLength": 100 },
+        "descriptionAr": { "type": "string", "minLength": 4, "maxLength": 400 },
+        "descriptionEn": { "type": "string", "minLength": 4, "maxLength": 400 },
+        "iconKey": { "type": "string", "minLength": 1, "maxLength": 40 },
+        "active": { "type": "boolean" }
+      },
+      "required": ["id", "nameAr", "nameEn", "descriptionAr", "descriptionEn", "iconKey", "active"]
+    },
+    "Doctor": {
+      "title": "Doctor",
+      "description": "Fictional demonstration clinic doctor profile.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 64, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "specialtyId": { "type": "string", "minLength": 1, "maxLength": 64, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "nameAr": { "type": "string", "minLength": 2, "maxLength": 120 },
+        "nameEn": { "type": "string", "minLength": 2, "maxLength": 120 },
+        "titleAr": { "type": "string", "minLength": 2, "maxLength": 120 },
+        "titleEn": { "type": "string", "minLength": 2, "maxLength": 120 },
+        "bioAr": { "type": "string", "minLength": 4, "maxLength": 500 },
+        "bioEn": { "type": "string", "minLength": 4, "maxLength": 500 },
+        "avatarUrl": { "type": "string", "minLength": 1, "maxLength": 300 },
+        "consultationFeeEgp": { "type": "number" },
+        "active": { "type": "boolean" },
+        "isDemoProfile": { "type": "boolean" }
+      },
+      "required": ["id", "specialtyId", "nameAr", "nameEn", "titleAr", "titleEn", "active", "isDemoProfile"]
+    },
+    "DoctorSchedule": {
+      "title": "DoctorSchedule",
+      "description": "Doctor working days, hours, breaks, and daily booking limits.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 64, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "doctorId": { "type": "string", "minLength": 1, "maxLength": 64, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "workingDays": { "type": "array" },
+        "startTime": { "type": "string", "minLength": 5, "maxLength": 5 },
+        "endTime": { "type": "string", "minLength": 5, "maxLength": 5 },
+        "breakStart": { "type": "string", "maxLength": 5 },
+        "breakEnd": { "type": "string", "maxLength": 5 },
+        "slotDurationMinutes": { "type": "integer" },
+        "dailyCapacity": { "type": "integer" },
+        "perSlotCapacity": { "type": "integer" },
+        "bookingsPaused": { "type": "boolean" }
+      },
+      "required": ["id", "doctorId", "workingDays", "startTime", "endTime", "slotDurationMinutes", "dailyCapacity", "perSlotCapacity", "bookingsPaused"]
+    },
+    "ScheduleException": {
+      "title": "ScheduleException",
+      "description": "Holidays, closures, or custom capacity overrides for a specific date.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 100, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "doctorId": { "type": "string", "minLength": 1, "maxLength": 64, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "date": { "type": "string", "minLength": 10, "maxLength": 10 },
+        "isClosed": { "type": "boolean" },
+        "reasonAr": { "type": "string", "maxLength": 200 },
+        "reasonEn": { "type": "string", "maxLength": 200 },
+        "customCapacity": { "type": "integer" }
+      },
+      "required": ["id", "doctorId", "date", "isClosed"]
+    },
+    "DailyCapacity": {
+      "title": "DailyCapacity",
+      "description": "Atomic daily capacity counter per doctor and date.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 120, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "doctorId": { "type": "string", "minLength": 1, "maxLength": 64, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "date": { "type": "string", "minLength": 10, "maxLength": 10 },
+        "bookedCount": { "type": "integer" },
+        "maxCapacity": { "type": "integer" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "doctorId", "date", "bookedCount", "maxCapacity", "updatedAt"]
+    },
+    "SlotReservation": {
+      "title": "SlotReservation",
+      "description": "Atomic slot lock preventing double booking for doctor + date + time.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "doctorId": { "type": "string", "minLength": 1, "maxLength": 64, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "date": { "type": "string", "minLength": 10, "maxLength": 10 },
+        "timeSlot": { "type": "string", "minLength": 5, "maxLength": 5 },
+        "appointmentId": { "type": "string", "minLength": 1, "maxLength": 100, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "status": { "type": "string", "enum": ["active", "released"] }
+      },
+      "required": ["id", "doctorId", "date", "timeSlot", "appointmentId", "status"]
+    },
+    "Appointment": {
+      "title": "Appointment",
+      "description": "Confirmed, checked-in, completed, cancelled, or no-show medical appointment.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 100, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "bookingRef": { "type": "string", "minLength": 4, "maxLength": 32 },
+        "patientUid": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "patientName": { "type": "string", "minLength": 2, "maxLength": 120 },
+        "patientPhone": { "type": "string", "minLength": 8, "maxLength": 20 },
+        "doctorId": { "type": "string", "minLength": 1, "maxLength": 64, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "doctorNameSnapshotAr": { "type": "string", "minLength": 2, "maxLength": 120 },
+        "doctorNameSnapshotEn": { "type": "string", "minLength": 2, "maxLength": 120 },
+        "specialtyId": { "type": "string", "minLength": 1, "maxLength": 64, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "specialtyNameSnapshotAr": { "type": "string", "minLength": 2, "maxLength": 100 },
+        "specialtyNameSnapshotEn": { "type": "string", "minLength": 2, "maxLength": 100 },
+        "date": { "type": "string", "minLength": 10, "maxLength": 10 },
+        "timeSlot": { "type": "string", "minLength": 5, "maxLength": 5 },
+        "status": { "type": "string", "enum": ["confirmed", "checked_in", "completed", "cancelled", "no_show"] },
+        "bookingType": { "type": "string", "enum": ["online", "walk_in", "reception_assisted", "waitlist_offer"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": [
+        "id", "bookingRef", "patientUid", "patientName", "patientPhone",
+        "doctorId", "doctorNameSnapshotAr", "doctorNameSnapshotEn",
+        "specialtyId", "specialtyNameSnapshotAr", "specialtyNameSnapshotEn",
+        "date", "timeSlot", "status", "bookingType", "createdAt", "updatedAt"
+      ]
+    },
+    "WaitlistEntry": {
+      "title": "WaitlistEntry",
+      "description": "Ordered waitlist entry for fully booked doctor schedule dates.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 100, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "patientUid": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "patientName": { "type": "string", "minLength": 2, "maxLength": 120 },
+        "patientPhone": { "type": "string", "minLength": 8, "maxLength": 20 },
+        "doctorId": { "type": "string", "minLength": 1, "maxLength": 64, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "specialtyId": { "type": "string", "minLength": 1, "maxLength": 64, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "date": { "type": "string", "minLength": 10, "maxLength": 10 },
+        "status": { "type": "string", "enum": ["waiting", "offered", "confirmed", "expired", "cancelled"] },
+        "offeredTimeSlot": { "type": "string", "maxLength": 5 },
+        "offerExpiresAt": { "type": "string", "format": "date-time" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "patientUid", "patientName", "patientPhone", "doctorId", "specialtyId", "date", "status", "createdAt"]
+    },
+    "NotificationItem": {
+      "title": "NotificationItem",
+      "description": "In-app booking, cancellation, and waitlist notifications.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 100, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "recipientUid": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "titleAr": { "type": "string", "minLength": 2, "maxLength": 160 },
+        "titleEn": { "type": "string", "minLength": 2, "maxLength": 160 },
+        "bodyAr": { "type": "string", "minLength": 2, "maxLength": 400 },
+        "bodyEn": { "type": "string", "minLength": 2, "maxLength": 400 },
+        "channel": { "type": "string", "enum": ["in_app", "simulated_sms", "simulated_whatsapp"] },
+        "read": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "recipientUid", "titleAr", "titleEn", "bodyAr", "bodyEn", "channel", "read", "createdAt"]
+    },
+    "ClinicSettings": {
+      "title": "ClinicSettings",
+      "description": "Global clinic operational policies and localization defaults.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 64, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "clinicNameAr": { "type": "string", "minLength": 2, "maxLength": 120 },
+        "clinicNameEn": { "type": "string", "minLength": 2, "maxLength": 120 },
+        "timezone": { "type": "string", "minLength": 3, "maxLength": 64 },
+        "cancellationCutoffHours": { "type": "integer" },
+        "defaultDailyLimit": { "type": "integer" },
+        "waitlistOfferExpirationMinutes": { "type": "integer" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "clinicNameAr", "clinicNameEn", "timezone", "cancellationCutoffHours", "defaultDailyLimit", "waitlistOfferExpirationMinutes", "updatedAt"]
+    },
+    "AuditLog": {
+      "title": "AuditLog",
+      "description": "Immutable administrative and booking audit history.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 100, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "actorUid": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "actorRole": { "type": "string", "enum": ["patient", "receptionist", "admin", "system"] },
+        "action": { "type": "string", "minLength": 2, "maxLength": 80 },
+        "targetType": { "type": "string", "minLength": 2, "maxLength": 60 },
+        "targetId": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "summaryAr": { "type": "string", "minLength": 2, "maxLength": 300 },
+        "summaryEn": { "type": "string", "minLength": 2, "maxLength": 300 },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "actorUid", "actorRole", "action", "targetType", "targetId", "summaryAr", "summaryEn", "createdAt"]
+    },
+    "RoleAssignment": {
+      "title": "RoleAssignment",
+      "description": "Server-managed role mapping for admins and receptionists.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "email": { "type": "string", "format": "email", "maxLength": 160 },
+        "assignedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email", "assignedAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserAccount" },
+      "description": "User account language preference document."
+    },
+    "/patientProfiles/{profileId}": {
+      "schema": { "$ref": "#/entities/PatientProfile" },
+      "description": "Private patient profile keyed by user UID."
+    },
+    "/specialties/{specialtyId}": {
+      "schema": { "$ref": "#/entities/Specialty" },
+      "description": "Medical specialties catalog."
+    },
+    "/doctors/{doctorId}": {
+      "schema": { "$ref": "#/entities/Doctor" },
+      "description": "Clinic doctors directory."
+    },
+    "/doctorSchedules/{scheduleId}": {
+      "schema": { "$ref": "#/entities/DoctorSchedule" },
+      "description": "Doctor weekly schedule and daily capacity rules."
+    },
+    "/scheduleExceptions/{exceptionId}": {
+      "schema": { "$ref": "#/entities/ScheduleException" },
+      "description": "Doctor date-level closures and overrides."
+    },
+    "/dailyCapacity/{capacityId}": {
+      "schema": { "$ref": "#/entities/DailyCapacity" },
+      "description": "Atomic daily booking counts per doctor/date."
+    },
+    "/slotReservations/{reservationId}": {
+      "schema": { "$ref": "#/entities/SlotReservation" },
+      "description": "Atomic per-slot reservation locks."
+    },
+    "/appointments/{appointmentId}": {
+      "schema": { "$ref": "#/entities/Appointment" },
+      "description": "Patient appointments with historical doctor/specialty snapshots."
+    },
+    "/waitlist/{entryId}": {
+      "schema": { "$ref": "#/entities/WaitlistEntry" },
+      "description": "Ordered waitlist queue entries and time-limited offers."
+    },
+    "/notifications/{notificationId}": {
+      "schema": { "$ref": "#/entities/NotificationItem" },
+      "description": "In-app notifications per recipient."
+    },
+    "/clinicSettings/{settingId}": {
+      "schema": { "$ref": "#/entities/ClinicSettings" },
+      "description": "Global clinic operational policies."
+    },
+    "/auditLogs/{logId}": {
+      "schema": { "$ref": "#/entities/AuditLog" },
+      "description": "Immutable operational audit logs."
+    },
+    "/admins/{adminId}": {
+      "schema": { "$ref": "#/entities/RoleAssignment" },
+      "description": "Trusted administrator allowlist documents."
+    },
+    "/receptionists/{staffId}": {
+      "schema": { "$ref": "#/entities/RoleAssignment" },
+      "description": "Trusted receptionist account assignments."
+    }
+  }
+}
