@@ -158,10 +158,10 @@ service cloud.firestore {
         'date', 'timeSlot', 'status', 'bookingType', 'createdAt', 'updatedAt'
       ])
         && data.keys().hasOnly([
-          'id', 'bookingRef', 'patientUid', 'patientName', 'patientPhone',
+          'id', 'bookingRef', 'patientUid', 'patientPhone', 'patientName',
           'doctorId', 'doctorNameSnapshotAr', 'doctorNameSnapshotEn',
           'specialtyId', 'specialtyNameSnapshotAr', 'specialtyNameSnapshotEn',
-          'date', 'timeSlot', 'status', 'bookingType', 'createdAt', 'updatedAt'
+          'date', 'timeSlot', 'status', 'bookingType', 'notes', 'createdAt', 'updatedAt'
         ])
         && isValidId(data.id)
         && data.bookingRef is string && data.bookingRef.size() >= 4 && data.bookingRef.size() <= 32
@@ -178,6 +178,7 @@ service cloud.firestore {
         && data.timeSlot is string && data.timeSlot.size() == 5
         && data.status in ['confirmed', 'checked_in', 'completed', 'cancelled', 'no_show']
         && data.bookingType in ['online', 'walk_in', 'reception_assisted', 'waitlist_offer']
+        && (!('notes' in data) || (data.notes is string && data.notes.size() <= 400))
         && data.createdAt is timestamp
         && data.updatedAt is timestamp;
     }

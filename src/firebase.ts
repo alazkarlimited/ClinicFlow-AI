@@ -14,7 +14,7 @@ import {
   serverTimestamp,
   setDoc,
 } from 'firebase/firestore';
-import firebaseConfig from '../firebase-applet-config.json';
+import firebaseFileConfig from '../firebase-applet-config.json';
 import type { LanguageCode } from './shared/types';
 
 export enum OperationType {
@@ -42,6 +42,15 @@ export interface FirestoreErrorInfo {
     }[];
   };
 }
+
+const firebaseConfig = {
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || firebaseFileConfig.apiKey,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || firebaseFileConfig.authDomain,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || firebaseFileConfig.projectId,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || firebaseFileConfig.appId,
+  firestoreDatabaseId:
+    import.meta.env.VITE_FIREBASE_DATABASE_ID || firebaseFileConfig.firestoreDatabaseId,
+};
 
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);

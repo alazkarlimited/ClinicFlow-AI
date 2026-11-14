@@ -6,3 +6,8 @@ coverage/
 *.log
 .env*
 !.env.example
+server.js
+.clinicflow-data.json
+.playwright-cli/
+*firebase-adminsdk*.json
+service-account*.json

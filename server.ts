@@ -1,8 +1,15 @@
 import 'dotenv/config';
 import express, { Request, Response, NextFunction } from 'express';
-import fs from 'node:fs/promises';
+import { existsSync } from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { z } from 'zod';
+import {
+  getAdminFirebase,
+  getFirebaseAppletConfig,
+  getStorageMode,
+  verifyFirestoreConnectionAtBoot,
+} from './server/firebaseAdmin';
 import {
   addScheduleExceptionAtomic,
   BookingError,
@@ -11,11 +18,11 @@ import {
   createAppointmentAtomic,
   getAvailabilityForDoctorDate,
   getNextSlotForDoctor,
-  getRawSnapshotForAi,
   getStateForRole,
   joinWaitlistAtomic,
   markNotificationReadAtomic,
   resetDemoDatabase,
+  resolveStaffRoleFromStore,
   triggerWaitlistOfferManually,
   updateAppointmentStatusAtomic,
   updatePatientProfileAtomic,
@@ -28,6 +35,8 @@ import {
   runPatientAssistant,
 } from './server/geminiService';
 import type { LanguageCode, UserRole } from './src/shared/types';
+
+const DEMO_MODE_ENABLED = process.env.DEMO_MODE_ENABLED !== 'false';
 
 const ADMIN_ALLOWLIST = new Set(
   (process.env.ADMIN_EMAILS ?? 'eng4elec.eg@gmail.com')
@@ -43,26 +52,24 @@ interface CallerContext {
   demoMode: boolean;
 }
 
-let firebaseApiKey: string | null = null;
-async function getFirebaseApiKey(): Promise<string | null> {
-  if (firebaseApiKey !== null) return firebaseApiKey;
-  try {
-    const raw = await fs.readFile(
-      path.resolve(process.cwd(), 'firebase-applet-config.json'),
-      'utf8'
-    );
-    const parsed = JSON.parse(raw) as { apiKey?: string };
-    firebaseApiKey = parsed.apiKey ?? '';
-  } catch {
-    firebaseApiKey = '';
-  }
-  return firebaseApiKey;
-}
-
 async function verifyFirebaseToken(
   idToken: string
 ): Promise<{ uid: string; email?: string; emailVerified: boolean } | null> {
-  const apiKey = await getFirebaseApiKey();
+  const adminCtx = getAdminFirebase();
+  if (adminCtx) {
+    try {
+      const decoded = await adminCtx.auth.verifyIdToken(idToken);
+      return {
+        uid: decoded.uid,
+        email: decoded.email?.toLowerCase(),
+        emailVerified: Boolean(decoded.email_verified),
+      };
+    } catch {
+      return null;
+    }
+  }
+
+  const apiKey = getFirebaseAppletConfig().apiKey;
   if (!apiKey) return null;
   try {
     const res = await fetch(
@@ -95,16 +102,13 @@ async function resolveCaller(req: Request): Promise<CallerContext> {
     const token = authHeader.slice(7).trim();
     const verified = await verifyFirebaseToken(token);
     if (verified) {
-      const state = await getRawSnapshotForAi();
       let role: UserRole = 'patient';
       if (verified.email && verified.emailVerified) {
         if (ADMIN_ALLOWLIST.has(verified.email)) {
           role = 'admin';
         } else {
-          const staff = state.staffAccounts.find(
-            (s) => s.email.toLowerCase() === verified.email
-          );
-          if (staff) role = staff.role;
+          const staffRole = await resolveStaffRoleFromStore(verified.email, verified.uid);
+          if (staffRole) role = staffRole;
         }
       }
       return {
@@ -116,8 +120,8 @@ async function resolveCaller(req: Request): Promise<CallerContext> {
     }
   }
 
-  // Isolated fictional Demo Mode context (never accesses production Firestore admin resources)
-  const isDemo = req.header('x-demo-mode') === 'true';
+  // Isolated fictional Demo Mode context (reads/writes strictly demo_* Firestore collections)
+  const isDemo = DEMO_MODE_ENABLED && req.header('x-demo-mode') === 'true';
   if (isDemo) {
     const requestedRole = req.header('x-demo-role') as UserRole | undefined;
     const allowedDemoRoles: UserRole[] = ['guest', 'patient', 'receptionist', 'admin'];
@@ -271,10 +275,34 @@ const aiBiSchema = z.object({
 
 async function startServer() {
   const app = express();
+  app.set('trust proxy', 1);
+  app.disable('x-powered-by');
   app.use(express.json({ limit: '1mb' }));
 
+  app.use((_req, res, next) => {
+    res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+    next();
+  });
+
+  // Verify Admin storage configuration and Firestore permissions at boot
+  const storageMode = await verifyFirestoreConnectionAtBoot();
+  const firebaseCfg = getFirebaseAppletConfig();
+
   app.get('/api/health', (_req, res) => {
-    res.json({ ok: true, service: 'clinicflow-ai', timestamp: new Date().toISOString() });
+    const aiConfigured = Boolean(
+      process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== 'MY_GEMINI_API_KEY'
+    );
+    res.json({
+      ok: true,
+      service: 'clinicflow-ai',
+      storage: getStorageMode(),
+      firestoreDatabaseId: firebaseCfg.firestoreDatabaseId,
+      demoModeEnabled: DEMO_MODE_ENABLED,
+      aiConfigured,
+      timestamp: new Date().toISOString(),
+    });
   });
 
   app.get('/api/clinic/state', async (req, res) => {
@@ -293,12 +321,13 @@ async function startServer() {
 
   app.get('/api/clinic/availability', async (req, res) => {
     try {
+      const caller = await resolveCaller(req);
       const doctorId = String(req.query.doctorId ?? '');
       const date = String(req.query.date ?? '');
       if (!doctorId || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
         return res.status(400).json({ error: 'Invalid doctorId or date', code: 'BAD_QUERY' });
       }
-      const availability = await getAvailabilityForDoctorDate(doctorId, date);
+      const availability = await getAvailabilityForDoctorDate(doctorId, date, caller.demoMode);
       if (!availability) {
         return res.status(404).json({ error: 'Doctor not found', code: 'DOCTOR_NOT_FOUND' });
       }
@@ -310,11 +339,12 @@ async function startServer() {
 
   app.get('/api/clinic/next-slot', async (req, res) => {
     try {
+      const caller = await resolveCaller(req);
       const doctorId = String(req.query.doctorId ?? '');
       if (!doctorId) {
         return res.status(400).json({ error: 'Missing doctorId', code: 'BAD_QUERY' });
       }
-      const next = await getNextSlotForDoctor(doctorId);
+      const next = await getNextSlotForDoctor(doctorId, caller.demoMode);
       res.json({ next });
     } catch (err) {
       sendError(res, err);
@@ -353,6 +383,7 @@ async function startServer() {
         notes: body.notes,
         actorUid: caller.uid,
         actorRole: caller.role,
+        demoMode: caller.demoMode,
       });
 
       res.status(201).json({ appointment });
@@ -371,6 +402,7 @@ async function startServer() {
         appointmentId: req.params.id,
         actorUid: caller.uid,
         actorRole: caller.role,
+        demoMode: caller.demoMode,
       });
       res.json(result);
     } catch (err) {
@@ -390,6 +422,7 @@ async function startServer() {
         nextStatus: body.status,
         actorUid: caller.uid,
         actorRole: caller.role,
+        demoMode: caller.demoMode,
       });
       res.json({ appointment });
     } catch (err) {
@@ -410,6 +443,7 @@ async function startServer() {
         patientPhone: body.patientPhone,
         doctorId: body.doctorId,
         date: body.date,
+        demoMode: caller.demoMode,
       });
       res.status(201).json({ entry });
     } catch (err) {
@@ -427,6 +461,7 @@ async function startServer() {
         entryId: req.params.id,
         actorUid: caller.uid,
         actorRole: caller.role,
+        demoMode: caller.demoMode,
       });
       res.json(result);
     } catch (err) {
@@ -444,6 +479,7 @@ async function startServer() {
         entryId: req.params.id,
         actorUid: caller.uid,
         actorRole: caller.role,
+        demoMode: caller.demoMode,
       });
       res.json({ entry });
     } catch (err) {
@@ -465,6 +501,7 @@ async function startServer() {
         email: body.email || undefined,
         preferredLanguage: body.preferredLanguage,
         elderlyAssistMode: body.elderlyAssistMode,
+        demoMode: caller.demoMode,
       });
       res.json({ profile });
     } catch (err) {
@@ -478,7 +515,7 @@ async function startServer() {
       if (caller.role === 'guest') {
         return res.status(401).json({ error: 'Authentication required', code: 'AUTH_REQUIRED' });
       }
-      await markNotificationReadAtomic(req.params.id, caller.uid);
+      await markNotificationReadAtomic(req.params.id, caller.uid, caller.demoMode);
       res.json({ ok: true });
     } catch (err) {
       sendError(res, err);
@@ -500,6 +537,7 @@ async function startServer() {
           breakEnd: body.schedule.breakEnd || undefined,
         },
         actorUid: caller.uid,
+        demoMode: caller.demoMode,
       });
       res.json(result);
     } catch (err) {
@@ -517,6 +555,7 @@ async function startServer() {
       const exception = await addScheduleExceptionAtomic({
         exception: body,
         actorUid: caller.uid,
+        demoMode: caller.demoMode,
       });
       res.json({ exception });
     } catch (err) {
@@ -534,6 +573,7 @@ async function startServer() {
       const settings = await updateSettingsAtomic({
         settings: body,
         actorUid: caller.uid,
+        demoMode: caller.demoMode,
       });
       res.json({ settings });
     } catch (err) {
@@ -553,6 +593,7 @@ async function startServer() {
         displayName: body.displayName,
         role: body.role,
         actorUid: caller.uid,
+        demoMode: caller.demoMode,
       });
       res.json({ staff });
     } catch (err) {
@@ -562,6 +603,9 @@ async function startServer() {
 
   app.post('/api/demo/reset', async (req, res) => {
     try {
+      if (!DEMO_MODE_ENABLED) {
+        return res.status(403).json({ error: 'Demo mode is disabled on this server', code: 'DEMO_DISABLED' });
+      }
       const caller = await resolveCaller(req);
       if (!caller.demoMode && caller.role !== 'admin') {
         return res.status(403).json({ error: 'Demo reset requires Demo Mode or Admin role', code: 'FORBIDDEN' });
@@ -588,6 +632,7 @@ async function startServer() {
         language: body.language as LanguageCode,
         callerUid: caller.uid,
         callerRole: caller.role,
+        demoMode: caller.demoMode,
       });
       res.json(result);
     } catch (err) {
@@ -605,6 +650,7 @@ async function startServer() {
       const result = await runAdminAnalyticsAssistant({
         question: body.question,
         language: body.language as LanguageCode,
+        demoMode: caller.demoMode,
       });
       res.json(result);
     } catch (err) {
@@ -616,7 +662,12 @@ async function startServer() {
     res.status(404).json({ error: 'API endpoint not found', code: 'NOT_FOUND' });
   });
 
-  const isProd = process.env.NODE_ENV === 'production';
+  const runningBundledServer = path.basename(process.argv[1] ?? '') === 'server.js';
+  const isProd =
+    process.env.NODE_ENV === 'production' ||
+    runningBundledServer ||
+    process.argv.includes('--prod');
+
   if (!isProd) {
     const { createServer: createViteServer } = await import('vite');
     const vite = await createViteServer({
@@ -625,18 +676,31 @@ async function startServer() {
     });
     app.use(vite.middlewares);
   } else {
-    const distDir = path.resolve(process.cwd(), 'dist');
+    const moduleDir = path.dirname(fileURLToPath(import.meta.url));
+    const candidateDists = [
+      path.resolve(process.cwd(), 'dist'),
+      path.resolve(moduleDir, 'dist'),
+      path.resolve(moduleDir, '..', 'dist'),
+    ];
+    const distDir =
+      candidateDists.find((dir) => existsSync(path.join(dir, 'index.html'))) ??
+      candidateDists[0]!;
+
     app.use(
       express.static(distDir, {
+        index: false,
         maxAge: '1h',
         setHeaders(res, filePath) {
-          if (filePath.includes('/assets/')) {
+          if (filePath.includes(`${path.sep}assets${path.sep}`)) {
             res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+          } else if (filePath.endsWith('index.html')) {
+            res.setHeader('Cache-Control', 'no-cache');
           }
         },
       })
     );
     app.get('*', (_req, res) => {
+      res.setHeader('Cache-Control', 'no-cache');
       res.sendFile(path.join(distDir, 'index.html'));
     });
   }
@@ -648,7 +712,9 @@ async function startServer() {
 
   const PORT = Number(process.env.PORT ?? 3000);
   app.listen(PORT, '0.0.0.0', () => {
-    console.log(`ClinicFlow AI server listening on http://0.0.0.0:${PORT}`);
+    console.log(
+      `ClinicFlow AI server (${isProd ? 'production' : 'development'}, storage=${storageMode}, db=${firebaseCfg.firestoreDatabaseId}) listening on http://0.0.0.0:${PORT}`
+    );
   });
 }
 

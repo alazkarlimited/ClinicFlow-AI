@@ -166,7 +166,9 @@ export async function runPatientAssistant(params: {
   language: LanguageCode;
   callerUid: string;
   callerRole: UserRole;
+  demoMode?: boolean;
 }): Promise<{ reply: string; cards: AiChatActionCard[]; aiAvailable: boolean }> {
+  const demoMode = params.demoMode ?? true;
   const ai = createGeminiClient();
   if (!ai) {
     return {
@@ -179,7 +181,7 @@ export async function runPatientAssistant(params: {
     };
   }
 
-  const state = await getRawSnapshotForAi();
+  const state = await getRawSnapshotForAi(demoMode);
   const nowTz = getNowInTimezone(new Date(), state.settings.timezone);
   const cards: AiChatActionCard[] = [];
 
@@ -243,7 +245,7 @@ STRICT RULES:
 
         try {
           if (call.name === 'list_specialties') {
-            const fresh = await getRawSnapshotForAi();
+            const fresh = await getRawSnapshotForAi(demoMode);
             result = fresh.specialties.map((s) => ({
               id: s.id,
               nameAr: s.nameAr,
@@ -251,7 +253,7 @@ STRICT RULES:
               doctorCount: fresh.doctors.filter((d) => d.specialtyId === s.id && d.active).length,
             }));
           } else if (call.name === 'find_doctors') {
-            const fresh = await getRawSnapshotForAi();
+            const fresh = await getRawSnapshotForAi(demoMode);
             const q = String(args.query ?? '').toLowerCase();
             const spFilter = args.specialtyId ? String(args.specialtyId) : '';
             const matched = fresh.doctors.filter((d) => {
@@ -287,7 +289,7 @@ STRICT RULES:
               };
             });
           } else if (call.name === 'check_doctor_availability') {
-            const fresh = await getRawSnapshotForAi();
+            const fresh = await getRawSnapshotForAi(demoMode);
             const doctorId = String(args.doctorId ?? '');
             const doctor = fresh.doctors.find((d) => d.id === doctorId);
             const sched = fresh.schedules.find((s) => s.doctorId === doctorId);
@@ -343,7 +345,7 @@ STRICT RULES:
               }
             }
           } else if (call.name === 'get_clinic_policies') {
-            const fresh = await getRawSnapshotForAi();
+            const fresh = await getRawSnapshotForAi(demoMode);
             result = {
               timezone: fresh.settings.timezone,
               cancellationCutoffHours: fresh.settings.cancellationCutoffHours,
@@ -357,7 +359,7 @@ STRICT RULES:
             if (params.callerRole === 'guest') {
               result = { error: 'User is browsing as a guest. Please sign in or enter Patient Portal.' };
             } else {
-              const fresh = await getRawSnapshotForAi();
+              const fresh = await getRawSnapshotForAi(demoMode);
               const mine = fresh.appointments
                 .filter((a) => a.patientUid === params.callerUid)
                 .slice(0, 10)
@@ -372,7 +374,7 @@ STRICT RULES:
               result = { appointments: mine };
             }
           } else if (call.name === 'prepare_booking_confirmation') {
-            const fresh = await getRawSnapshotForAi();
+            const fresh = await getRawSnapshotForAi(demoMode);
             const doctor = fresh.doctors.find((d) => d.id === String(args.doctorId));
             const sched = fresh.schedules.find((s) => s.doctorId === String(args.doctorId));
             const date = String(args.date);
@@ -435,6 +437,7 @@ STRICT RULES:
                 bookingType: 'online',
                 actorUid: params.callerUid,
                 actorRole: params.callerRole,
+                demoMode,
               });
               result = { confirmed: true, bookingRef: apt.bookingRef, appointment: apt };
               cards.push({
@@ -452,6 +455,7 @@ STRICT RULES:
                 appointmentId: String(args.bookingRef),
                 actorUid: params.callerUid,
                 actorRole: params.callerRole,
+                demoMode,
               });
               result = { cancelled: true, bookingRef: cancelled.appointment.bookingRef };
             }
@@ -514,7 +518,9 @@ STRICT RULES:
 export async function runAdminAnalyticsAssistant(params: {
   question: string;
   language: LanguageCode;
+  demoMode?: boolean;
 }): Promise<{ report: AiBiReport | null; aiAvailable: boolean; errorMessage?: string }> {
+  const demoMode = params.demoMode ?? true;
   const ai = createGeminiClient();
   if (!ai) {
     return {
@@ -527,7 +533,7 @@ export async function runAdminAnalyticsAssistant(params: {
     };
   }
 
-  const state = await getRawSnapshotForAi();
+  const state = await getRawSnapshotForAi(demoMode);
   const { dateStr: today } = getNowInTimezone(new Date(), state.settings.timezone);
   const metrics = computeAnalyticsSummary({
     specialties: state.specialties,

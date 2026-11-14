@@ -146,6 +146,7 @@
         "timeSlot": { "type": "string", "minLength": 5, "maxLength": 5 },
         "status": { "type": "string", "enum": ["confirmed", "checked_in", "completed", "cancelled", "no_show"] },
         "bookingType": { "type": "string", "enum": ["online", "walk_in", "reception_assisted", "waitlist_offer"] },
+        "notes": { "type": "string", "maxLength": 400 },
         "createdAt": { "type": "string", "format": "date-time" },
         "updatedAt": { "type": "string", "format": "date-time" }
       },
